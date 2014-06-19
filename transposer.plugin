@@ -1,0 +1,9 @@
+[Plugin]
+Loader=python
+Module=transposer
+IAge=3
+Name=Transposer
+Description=A plugin to transpose chords in text files
+Authors=Philipp Kitzberger <philipp@kitze.net>
+Copyright=Copyright © 2014 Philipp Kitzberger <philipp@kitze.net>
+Website=http://www.kitze.net
