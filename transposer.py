@@ -8,7 +8,8 @@ ui_str = """<ui>
   <menubar name="MenuBar">
     <menu name="ToolsMenu" action="Tools">
       <placeholder name="ToolsOps_2">
-        <menuitem name="Transposer" action="Transposer"/>
+        <menuitem name="TransposeUp" action="TransposeUp"/>
+        <menuitem name="TransposeDown" action="TransposeDown"/>
       </placeholder>
     </menu>
   </menubar>
@@ -38,9 +39,10 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 
         # Create a new action group
         self._action_group = Gtk.ActionGroup("TransposerPluginActions")
-        self._action_group.add_actions([("Transposer", None, _("Transpose chords by +1"),
-                                         None, _("Transpose chords by +1"),
-                                         self.on_transpose_document)])
+        self._action_group.add_actions([
+            ("TransposeUp", None, _("Transpose chords by +1"), None, _("Transpose chords by +1"), lambda e: self.on_transpose(None, 1)),
+            ("TransposeDown", None, _("Transpose chords by -1"), None, _("Transpose chords by -1"), lambda e: self.on_transpose(None, -1))
+        ])
 
         # Insert the action group
         manager.insert_action_group(self._action_group, -1)
@@ -65,7 +67,7 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         self._action_group.set_sensitive(self.window.get_active_document() != None)
 
     # Menu activate handlers
-    def on_transpose_document(self, action):
+    def on_transpose(self, action, transposeBy):
         doc = self.window.get_active_document()
 
         if not doc:
@@ -78,14 +80,14 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         # ^\s*([ABHCDEFG]+[b#]?m?[79]?\s*)*$
         pattern = r'^\s*([ABCDEFG]+[b#]?m?[679]?\s*)+$'
 
-        string = re.sub(pattern, transpose_chord_line, string, 0, re.M | re.I)
+        string = re.sub(pattern, lambda matchObj: transpose_chord_line(matchObj, transposeBy), string, 0, re.M | re.I)
         
         doc.set_text(string)
 
-def transpose_chord_line(matchObj):
+def transpose_chord_line(matchObj, transposeBy):
     string = matchObj.group(0)
     print "Transposing line '" + string + "':"
-    string = re.sub(r'([ABCDEFG][^\s]*(\s|$)?)', transpose_chord, string, re.M | re.I)
+    string = re.sub(r'([ABCDEFG][^\s]*(\s|$)?)', lambda matchObj: transpose_chord(matchObj, transposeBy), string, re.M | re.I)
     print "Done. Now it is: '" + string + "'.\n"
     return string
 
@@ -97,7 +99,7 @@ def transpose_chord_line(matchObj):
 # - Bb
 # - A#m7
 #
-def transpose_chord(matchObj):
+def transpose_chord(matchObj, transposeBy):
     chord = matchObj.group(0)
     len_chord = len(chord)
     #print "\n\n'"+chord+"'"
@@ -105,11 +107,10 @@ def transpose_chord(matchObj):
     chord = re.match(r'([ABCDEFG][b#]?)(.*)', chord, re.M | re.I)
     note = chord.group(1)
 
-    transpose = 1
     halftones = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 
     index = halftones.index(note)
-    newindex = (index+transpose) % len(halftones)
+    newindex = (index+transposeBy) % len(halftones)
 
     newchord = halftones[newindex] + chord.group(2)
     if len(newchord) != len_chord:
@@ -119,6 +120,6 @@ def transpose_chord(matchObj):
             if newchord[-1:] == ' ':
                 newchord = newchord[:-1]
 
-    #print "- transpose '" + chord.group(0) + "' by " + str(transpose) + " to '" + newchord + "'"
+    #print "- transposeBy '" + chord.group(0) + "' by " + str(transposeBy) + " to '" + newchord + "'"
 
     return newchord
