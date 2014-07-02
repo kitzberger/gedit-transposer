@@ -71,25 +71,29 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         doc = self.window.get_active_document()
 
         if not doc:
+            print "No doc found!"
             return
 
         start, end = doc.get_bounds()
         string = doc.get_text(start, end, True)
-#       print "String found: \n" + string
+        # print "String found: \n" + string
 
         # ^\s*([ABHCDEFG]+[b#]?m?[79]?\s*)*$
-        pattern = r'^\s*([ABCDEFG]+[b#]?m?[679]?\s*)+$'
 
-        string = re.sub(pattern, lambda matchObj: transpose_chord_line(matchObj, transposeBy), string, 0, re.M | re.I)
-        
-        doc.set_text(string)
+        stringAfter = ''
+        pattern = r'^\s*([ABHCDEFG]+[b#]?m?[679]?[\s,]*)+$'
+        for line in string.split('\n'):
+            stringAfter += re.sub(pattern, lambda matchObj: transpose_chord_line(matchObj, transposeBy), line, 0, re.I) + "\n"
+
+        doc.set_text(stringAfter.rstrip())
 
 def transpose_chord_line(matchObj, transposeBy):
     string = matchObj.group(0)
     print "Transposing line '" + string + "':"
-    string = re.sub(r'([ABCDEFG][^\s]*(\s|$)?)', lambda matchObj: transpose_chord(matchObj, transposeBy), string, re.M | re.I)
-    print "Done. Now it is: '" + string + "'.\n"
-    return string
+    # Process each chord (incl. following whitespace)
+    string = re.sub(r'([ABHCDEFG][^\s]*\s?)', lambda matchObj: transpose_chord(matchObj, transposeBy), string, 0, re.I)
+    print "Done. Now it is: '" + string.rstrip() + "'.\n"
+    return string.rstrip()
 
 #
 # matchObj.group(0):
@@ -104,10 +108,13 @@ def transpose_chord(matchObj, transposeBy):
     len_chord = len(chord)
     #print "\n\n'"+chord+"'"
 
-    chord = re.match(r'([ABCDEFG][b#]?)(.*)', chord, re.M | re.I)
+    chord = re.match(r'([ABHCDEFG][b#]?)(.*)', chord, re.I)
     note = chord.group(1)
 
     halftones = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+    # special handling for german H
+    if note == 'H':
+        halftones = ['A', 'Bb', 'H', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 
     index = halftones.index(note)
     newindex = (index+transposeBy) % len(halftones)
