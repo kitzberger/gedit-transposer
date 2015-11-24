@@ -71,12 +71,12 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         doc = self.window.get_active_document()
 
         if not doc:
-            print "No doc found!"
+            print("No doc found!")
             return
 
         start, end = doc.get_bounds()
         string = doc.get_text(start, end, True)
-        # print "String found: \n" + string
+        # print("String found: \n" + string)
 
         # ^\s*([ABHCDEFG]+[b#]?m?[79]?\s*)*$
 
@@ -89,10 +89,10 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 
 def transpose_chord_line(matchObj, transposeBy):
     string = matchObj.group(0)
-    print "Transposing line '" + string + "':"
+    print("Transposing line '" + string + "':")
     # Process each chord (incl. following whitespace)
     string = re.sub(r'([ABHCDEFG][^\s]*\s?)', lambda matchObj: transpose_chord(matchObj, transposeBy), string, 0, re.I)
-    print "Done. Now it is: '" + string.rstrip() + "'.\n"
+    print("Done. Now it is: '" + string.rstrip() + "'.\n")
     return string.rstrip()
 
 #
@@ -106,7 +106,7 @@ def transpose_chord_line(matchObj, transposeBy):
 def transpose_chord(matchObj, transposeBy):
     chord = matchObj.group(0)
     len_chord = len(chord)
-    #print "\n\n'"+chord+"'"
+    #print("\n\n'"+chord+"'")
 
     chord = re.match(r'([ABHCDEFG][b#]?)(.*)', chord, re.I)
     note = chord.group(1)
@@ -127,6 +127,6 @@ def transpose_chord(matchObj, transposeBy):
             if newchord[-1:] == ' ':
                 newchord = newchord[:-1]
 
-    #print "- transposeBy '" + chord.group(0) + "' by " + str(transposeBy) + " to '" + newchord + "'"
+    #print("- transposeBy '" + chord.group(0) + "' by " + str(transposeBy) + " to '" + newchord + "'")
 
     return newchord
