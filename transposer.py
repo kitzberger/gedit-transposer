@@ -5,14 +5,19 @@ import pprint
 
 # Menu item example, insert a new item in the Tools menu
 ui_str = """<ui>
-  <menubar name="MenuBar">
-    <menu name="ToolsMenu" action="Tools">
-      <placeholder name="ToolsOps_2">
-        <menuitem name="TransposeUp" action="TransposeUp"/>
-        <menuitem name="TransposeDown" action="TransposeDown"/>
-      </placeholder>
-    </menu>
-  </menubar>
+    <menubar name="MenuBar">
+        <menu name="ToolsMenu" action="Tools">
+            <placeholder name="Transpose">
+                <menuitem name="TransposeUp" action="TransposeUp"/>
+                <menuitem name="TransposeDown" action="TransposeDown"/>
+            </placeholder>
+        </menu>
+    </menubar>
+    <toolbar name="ToolBar">
+        <separator />
+        <toolitem name="TransposeToolItemUp" action="TransposeUp" />
+        <toolitem name="TransposeToolItemDown" action="TransposeDown" />
+    </toolbar>
 </ui>
 """
 class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
@@ -81,7 +86,7 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         # ^\s*([ABHCDEFG]+[b#]?m?[79]?\s*)*$
 
         stringAfter = ''
-        pattern = r'^\s*([ABHCDEFG]+[b#]?m?[679]?[\s,]*)+$'
+        pattern = r'^\s*([ABHCDEFG]+[b#]?(m|sus|add|dim|maj|aug)?(2|3|4|5|6|7|9|11|13)?(#5|b5|b9|#9|#11)?[\s,]*)+$'
         for line in string.split('\n'):
             stringAfter += re.sub(pattern, lambda matchObj: transpose_chord_line(matchObj, transposeBy), line, 0, re.I) + "\n"
 
@@ -90,26 +95,41 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
 def transpose_chord_line(matchObj, transposeBy):
     string = matchObj.group(0)
     print("Transposing line '" + string + "':")
+
+    specialSpaceMode = False
+    if re.search(r'[ ]{2}', string, re.I) is None:
+        # 'spaces-only-as-separator'
+        specialSpaceMode = True
+
     # Process each chord (incl. following whitespace)
-    string = re.sub(r'([ABHCDEFG][^\s]*\s?)', lambda matchObj: transpose_chord(matchObj, transposeBy), string, 0, re.I)
+    string = re.sub(r'([ABHCDEFG][^\s]*\s?)', lambda matchObj: transpose_chord(matchObj, transposeBy, specialSpaceMode), string, 0, re.I)
+
     print("Done. Now it is: '" + string.rstrip() + "'.\n")
     return string.rstrip()
 
 #
 # matchObj.group(0):
-# - E.
+# - E
 # - Dm
 # - H7
 # - Bb
 # - A#m7
+# - ...
+# Todo: F/C
 #
-def transpose_chord(matchObj, transposeBy):
+def transpose_chord(matchObj, transposeBy, specialSpaceMode):
+    #print("Space-Mode: " + mode)
     chord = matchObj.group(0)
     len_chord = len(chord)
     #print("\n\n'"+chord+"'")
 
+    # Full chords
     chord = re.match(r'([ABHCDEFG][b#]?)(.*)', chord, re.I)
+    # Root note only
     note = chord.group(1)
+    # Appendix, e.g. '7', 'm7' or 'sus2'
+    appendix = chord.group(2)
+
 
     halftones = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
     # special handling for german H
@@ -119,11 +139,19 @@ def transpose_chord(matchObj, transposeBy):
     index = halftones.index(note)
     newindex = (index+transposeBy) % len(halftones)
 
-    newchord = halftones[newindex] + chord.group(2)
-    if len(newchord) != len_chord:
+
+    newchord = halftones[newindex] + appendix
+
+    # in case the new chord lost or gained a 'b' or '#'
+    if not specialSpaceMode and len(newchord) != len_chord:
+        # in case the new chord lost something,
+        # add a space after it
         if len(newchord) < len_chord:
             newchord += ' '
+        # in case the new chord has gained length
         else:
+            # and it's tailing a space,
+            # cut off the space
             if newchord[-1:] == ' ':
                 newchord = newchord[:-1]
 

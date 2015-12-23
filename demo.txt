@@ -1,0 +1,42 @@
+Lorem Ipsum - Unknown Artist
+============================
+
+Capo II
+
+ F                              C
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+ F                               G
+sed diam nonumy eirmod tempor invidunt ut labore et dolore 
+ Am                              C   
+magna aliquyam erat, sed diam voluptua. At vero eos et 
+Am                                  F/C
+accusam et justo duo dolores et ea rebum. Stet clita kasd 
+ Bb                                     B
+gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+ Dsus2                                  E7
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+
+
+F C
+sed diam nonumy eirmod tempor invidunt ut labore et dolore 
+F Am G H7
+magna aliquyam erat, sed diam voluptua. At vero eos et 
+C/G D7 G4
+accusam et justo duo dolores et ea rebum. Stet clita 
+Am7 Ddim6
+kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+F   C
+sed diam nonumy eirmod tempor invidunt ut labore et dolore 
+F   Am  G  H7
+magna aliquyam erat, sed diam voluptua. At vero eos et 
+C/G D7  G4
+accusam et justo duo dolores et ea rebum. Stet clita 
+Am7 Ddim6
+kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+Fadd4                   Fmaj7              E13
+sed diam nonumy eirmod tempor invidunt ut labore et dolore 
+Fmaj7#11   Am  G  H7
+magna aliquyam erat, sed diam voluptua. At vero eos et 
+
