@@ -1,15 +1,14 @@
 # gedit-transposer
 
-This plugin for gedit enables to transpose chords within a text document by half notes.
+This plugin for gedit enables to transpose chords within a text document by single half notes.
 
 You can trigger the up resp. down transposing by clicking the items in the 'Tools' menu or by pressing <Ctrl><Alt>u resp. <Ctrl><Alt>d.
 
 ![Screenshot of new menu items](screenshot.png?raw=true)
 
-The tool will then try to detect lines that contain chords and transpose them accordingly. It should cover quite a variety of chords types, such as Am, C/G and also weird ones like Fmaj7#11. Please let me know if I missed some so I can improve it!
+The tool will then try to detect lines that contain chords and transpose them accordingly. It should cover quite a variety of chords types, such as Am, C/G and even weird ones like Fmaj7#11. Please let me know if I missed some so I can improve the algorithm.
 
-The tool also destinguishes between lines that are using spaces to 'position' the chords above some text and those that don't do that. In the first case it tries to adjust the amount of spaces so the chord positions won't change. In the latter case it doesn't do any magic to the spaces between them.
-
+The tool also distinguishes between lines that are using spaces to 'position' the chords above some text and those that don't do that and just space separate the chords. In the first case it tries to adjust the amount of spaces so the chord positions won't change. In the latter case it doesn't do any magic to the spaces between them.
 
 Original example file:
 ```
