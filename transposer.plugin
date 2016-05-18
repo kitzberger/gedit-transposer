@@ -6,5 +6,5 @@ Name=Transposer
 Description=A plugin to transpose chords in text files
 Description[de]=Ein Plugin um Akkorde in Textdateien zu transponieren
 Authors=Philipp Kitzberger <philipp@kitze.net>
-Copyright=Copyright © 2014 Philipp Kitzberger <philipp@kitze.net>
+Copyright=Copyright © 2016 Philipp Kitzberger <philipp@kitze.net>
 Website=http://www.kitze.net
