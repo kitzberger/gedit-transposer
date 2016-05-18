@@ -83,10 +83,8 @@ class TransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         string = doc.get_text(start, end, True)
         # print("String found: \n" + string)
 
-        # ^\s*([ABHCDEFG]+[b#]?m?[79]?\s*)*$
-
         stringAfter = ''
-        pattern = r'^\s*([ABHCDEFG]+[b#]?(m|sus|add|dim|maj|aug)?(2|3|4|5|6|7|9|11|13)?(#5|b5|b9|#9|#11)?[\s,]*)+$'
+        pattern = r'^\s*([ABHCDEFG]+[b#]?(m|sus|add|dim|maj|aug|2|3|4|5|6|7|9|11|13|#5|b5|b9|#9|#11){0,4}(\/[ABHCDEFG][b#]?)?[\s,]*)+$'
         for line in string.split('\n'):
             stringAfter += re.sub(pattern, lambda matchObj: transpose_chord_line(matchObj, transposeBy), line, 0, re.I) + "\n"
 
@@ -96,13 +94,12 @@ def transpose_chord_line(matchObj, transposeBy):
     string = matchObj.group(0)
     print("Transposing line '" + string + "':")
 
-    specialSpaceMode = False
+    keepSpacesUntouched = False
     if re.search(r'[ ]{2}', string, re.I) is None:
-        # 'spaces-only-as-separator'
-        specialSpaceMode = True
+        keepSpacesUntouched = True
 
     # Process each chord (incl. following whitespace)
-    string = re.sub(r'([ABHCDEFG][^\s]*\s?)', lambda matchObj: transpose_chord(matchObj, transposeBy, specialSpaceMode), string, 0, re.I)
+    string = re.sub(r'([ABHCDEFG][^\s]*\s{0,2})', lambda matchObj: transpose_chord(matchObj, transposeBy, keepSpacesUntouched), string, 0, re.I)
 
     print("Done. Now it is: '" + string.rstrip() + "'.\n")
     return string.rstrip()
@@ -115,21 +112,28 @@ def transpose_chord_line(matchObj, transposeBy):
 # - Bb
 # - A#m7
 # - ...
-# Todo: F/C
 #
-def transpose_chord(matchObj, transposeBy, specialSpaceMode):
-    #print("Space-Mode: " + mode)
-    chord = matchObj.group(0)
+def transpose_chord(matchObj, transposeBy, keepSpacesUntouched):
+    if type(matchObj) is str:
+        chord = matchObj
+    else:
+        chord = matchObj.group(0)
+
     len_chord = len(chord)
-    #print("\n\n'"+chord+"'")
 
     # Full chords
-    chord = re.match(r'([ABHCDEFG][b#]?)(.*)', chord, re.I)
+    chord = re.match(r'([ABHCDEFG][b#]?)([^\/]*)(\/)?(.*)?', chord, re.I)
     # Root note only
     note = chord.group(1)
     # Appendix, e.g. '7', 'm7' or 'sus2'
     appendix = chord.group(2)
+    # Optional bass note
+    bass = chord.group(4)
 
+    if bass:
+        # transpose bass note only and keepSpacesUntouched=True
+        # since the spaces will be handled for the full chord later.
+        bass = '/' + transpose_chord(bass, transposeBy, True)
 
     halftones = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
     # special handling for german H
@@ -139,22 +143,24 @@ def transpose_chord(matchObj, transposeBy, specialSpaceMode):
     index = halftones.index(note)
     newindex = (index+transposeBy) % len(halftones)
 
-
-    newchord = halftones[newindex] + appendix
+    newchord = halftones[newindex] + appendix + bass
 
     # in case the new chord lost or gained a 'b' or '#'
-    if not specialSpaceMode and len(newchord) != len_chord:
+    if not keepSpacesUntouched and len(newchord) != len_chord:
+        diff = len_chord-len(newchord)
         # in case the new chord lost something,
-        # add a space after it
-        if len(newchord) < len_chord:
-            newchord += ' '
+        # add one or more spaces after it
+        if diff > 0:
+            newchord += ' '*diff
         # in case the new chord has gained length
         else:
-            # and it's tailing a space,
-            # cut off the space
-            if newchord[-1:] == ' ':
-                newchord = newchord[:-1]
+            # and it's one or more tailing spaces,
+            # cut off the diff-numbered spaces
+            while diff < 0:
+                diff += 1
+                if newchord[-1:] == ' ':
+                    newchord = newchord[:-1]
 
-    #print("- transposeBy '" + chord.group(0) + "' by " + str(transposeBy) + " to '" + newchord + "'")
+    print("- transpose " + ("'" + chord.group(0) + "'").ljust(15) + " by " + str(transposeBy) + " to '" + newchord + "'" + (""," (keepSpacesUntouched)")[keepSpacesUntouched])
 
     return newchord
