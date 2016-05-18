@@ -68,6 +68,7 @@ class GeditTransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
             return
 
         start, end = doc.get_bounds()
+
         string = doc.get_text(start, end, True)
         # print("String found: \n" + string)
 
@@ -76,7 +77,17 @@ class GeditTransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
         for line in string.split('\n'):
             stringAfter += re.sub(pattern, lambda matchObj: transpose_chord_line(matchObj, transposeBy), line, 0, re.I) + "\n"
 
+        # Position cursor to beginning of document before starting the text alteration
+        doc.place_cursor(start)
+
+        # Change text as one user action (undo/redo-able action)
+        doc.begin_user_action()
         doc.set_text(stringAfter.rstrip())
+        doc.end_user_action()
+
+        # Reposition cursor to beginning of document
+        start, end = doc.get_bounds()
+        doc.place_cursor(start)
 
 def transpose_chord_line(matchObj, transposeBy):
     string = matchObj.group(0)
