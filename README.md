@@ -2,7 +2,7 @@
 
 This plugin for gedit enables to transpose chords within a text document by single half notes.
 
-You can trigger the up resp. down transposing by clicking the items in the 'Tools' menu or by pressing <Ctrl><Alt>u resp. <Ctrl><Alt>d.
+You can trigger the up resp. down transposing by clicking the items in the 'Tools' menu or by pressing Ctrl+Alt+u resp. Ctrl+Alt+d.
 
 ![Screenshot of new menu items](screenshot.png?raw=true)
 
