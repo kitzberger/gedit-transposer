@@ -34,9 +34,6 @@ class GeditTransposerApp(GObject.Object, Gedit.AppActivatable):
             self.app.set_accels_for_action("win.%s" % action, [])
         del self.menu_ext
 
-    def do_update_state(self):
-        pass
-
 class GeditTransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
     __gtype_name__ = "GeditTransposerWindow"
 
@@ -58,6 +55,9 @@ class GeditTransposerWindowActivatable(GObject.Object, Gedit.WindowActivatable):
             print("Error initializing \"Transposer\" plugin")
             print(traceback.print_exc())
 
+    def do_update_state(self):
+        for action, config in ACTIONS.items():
+            self.window.lookup_action(action).set_enabled(self.window.get_active_document() is not None)
 
     # Menu activate handlers
     def on_transpose(self, transposeBy):
