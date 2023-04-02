@@ -135,9 +135,12 @@ def transpose_chord(matchObj, transposeBy, keepSpacesUntouched):
         bass = '/' + transpose_chord(bass, transposeBy, True)
 
     halftones = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+    # special handline for flat chords
+    if note in ['Ab', 'Db', 'Eb', 'Gb']:
+        halftones = ['A', 'Bb', 'B', 'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab']
     # special handling for german H
     if note == 'H':
-        halftones = ['A', 'Bb', 'H', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+        halftones[2] = 'H'
 
     index = halftones.index(note)
     newindex = (index+transposeBy) % len(halftones)
